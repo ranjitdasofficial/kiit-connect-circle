@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   MapPin, Briefcase, GraduationCap, Calendar, Mail, Phone, Globe, 
   Linkedin, Twitter, Github, Facebook, Edit, Settings, MessageSquare,
@@ -10,6 +10,7 @@ import Footer from "@/components/layout/Footer";
 import GlassCard from "@/components/ui/GlassCard";
 import AnimatedButton from "@/components/ui/AnimatedButton";
 import { cn } from "@/lib/utils";
+import { toast } from "@/components/ui/use-toast";
 
 interface Education {
   degree: string;
@@ -39,6 +40,7 @@ interface ProfileTabsProps {
   onTabChange: (tab: string) => void;
 }
 
+// Keep the ProfileTabs component
 const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: "about", label: "About" },
@@ -71,13 +73,50 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onTabChange }) => 
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("about");
+  const [isConnected, setIsConnected] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  
+  // Check if it's the user's own profile
+  const isOwnProfile = !id || id === "me";
 
-  // Mock profile data
+  useEffect(() => {
+    // This would be an API call in a real app
+    // Here we'll simulate connections for the predefined alumni
+    if (id === "1" || id === "5") {
+      setIsConnected(true);
+      setIsPending(false);
+    } else if (id === "3") {
+      setIsConnected(false);
+      setIsPending(true);
+    } else {
+      setIsConnected(false);
+      setIsPending(false);
+    }
+  }, [id]);
+  
+  // Mock profile data - in a real app, this would be fetched from an API
   const profile = {
-    name: "Priya Sharma",
+    name: id === "1" ? "Priya Sharma" : 
+          id === "2" ? "Rahul Verma" :
+          id === "3" ? "Ananya Patel" :
+          id === "4" ? "Vikram Singh" :
+          id === "5" ? "Neha Gupta" :
+          id === "6" ? "Arjun Malhotra" : "Your Profile",
     avatar: null, // Set to image URL if available
-    headline: "Software Engineer at Google",
-    location: "San Francisco, CA",
+    headline: id === "1" ? "Software Engineer at Google" :
+              id === "2" ? "Product Manager at Microsoft" :
+              id === "3" ? "UI/UX Designer at Adobe" :
+              id === "4" ? "Data Scientist at Amazon" :
+              id === "5" ? "Mechanical Engineer at Tesla" :
+              id === "6" ? "Investment Banker at Goldman Sachs" : "Your Headline",
+    location: id === "1" ? "San Francisco, CA" : 
+              id === "2" ? "Seattle, WA" :
+              id === "3" ? "Bangalore, India" :
+              id === "4" ? "New York, NY" :
+              id === "5" ? "Austin, TX" :
+              id === "6" ? "Mumbai, India" : "Your Location",
     bio: "Full-stack developer with 5 years of experience building web and mobile applications. Passionate about clean code, user experience, and building products that make a difference. KIIT alumna who loves to connect with fellow students and alumni.",
     contact: {
       email: "priya.sharma@example.com",
@@ -178,6 +217,25 @@ const Profile = () => {
   };
 
   const initials = getInitials(profile.name);
+  
+  const handleConnect = () => {
+    setIsPending(true);
+    toast({
+      title: "Connection Request Sent",
+      description: `Your connection request to ${profile.name} has been sent.`,
+    });
+  };
+  
+  const handleMessage = () => {
+    navigate(`/messages?contact=${id}`);
+  };
+  
+  const handleEdit = () => {
+    toast({
+      title: "Edit Profile",
+      description: "Profile editing functionality will be available soon.",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-kiit-black">
@@ -190,9 +248,14 @@ const Profile = () => {
             <div className="lg:col-span-1">
               <GlassCard animation="fade" delay={100} className="overflow-hidden">
                 <div className="relative h-32 bg-gradient-to-r from-kiit-gold/20 to-kiit-gold/5">
-                  <button className="absolute top-3 right-3 p-2 bg-black/20 rounded-full text-white/70 hover:text-white hover:bg-black/40 transition-colors">
-                    <Edit size={16} />
-                  </button>
+                  {isOwnProfile && (
+                    <button 
+                      className="absolute top-3 right-3 p-2 bg-black/20 rounded-full text-white/70 hover:text-white hover:bg-black/40 transition-colors"
+                      onClick={handleEdit}
+                    >
+                      <Edit size={16} />
+                    </button>
+                  )}
                 </div>
                 
                 <div className="px-6 pb-6">
@@ -222,16 +285,30 @@ const Profile = () => {
                     )}
                   </div>
                   
-                  <div className="flex justify-center space-x-2 mb-6">
-                    <AnimatedButton variant="primary" size="sm">
-                      <MessageSquare size={14} className="mr-2" />
-                      Message
-                    </AnimatedButton>
-                    <AnimatedButton variant="outline" size="sm">
-                      <Users size={14} className="mr-2" />
-                      Connect
-                    </AnimatedButton>
-                  </div>
+                  {!isOwnProfile && (
+                    <div className="flex justify-center space-x-2 mb-6">
+                      {isConnected ? (
+                        <AnimatedButton 
+                          variant="primary" 
+                          size="sm"
+                          onClick={handleMessage}
+                        >
+                          <MessageSquare size={14} className="mr-2" />
+                          Message
+                        </AnimatedButton>
+                      ) : (
+                        <AnimatedButton 
+                          variant="primary" 
+                          size="sm"
+                          disabled={isPending}
+                          onClick={handleConnect}
+                        >
+                          <Users size={14} className="mr-2" />
+                          {isPending ? "Request Sent" : "Connect"}
+                        </AnimatedButton>
+                      )}
+                    </div>
+                  )}
                   
                   <div className="space-y-4">
                     {profile.contact.email && (

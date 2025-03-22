@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
 import { MapPin, Briefcase, Calendar, ArrowUpRight, MessageSquare } from "lucide-react";
 import GlassCard from "../ui/GlassCard";
 import AnimatedButton from "../ui/AnimatedButton";
@@ -24,6 +23,9 @@ interface ProfileCardProps {
   className?: string;
   animation?: "fade" | "scale" | "slide" | "none";
   delay?: number;
+  onConnect?: () => void;
+  onMessage?: () => void;
+  onProfileClick?: () => void;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -31,6 +33,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   className,
   animation = "none",
   delay = 0,
+  onConnect,
+  onMessage,
+  onProfileClick,
 }) => {
   const {
     id,
@@ -56,12 +61,29 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   const initials = getInitials(name);
 
+  const handleConnectClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onConnect) onConnect();
+  };
+
+  const handleMessageClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onMessage) onMessage();
+  };
+
+  const handleCardClick = () => {
+    if (onProfileClick) onProfileClick();
+  };
+
   return (
     <GlassCard 
-      className={cn("h-full", className)} 
+      className={cn("h-full cursor-pointer", className)} 
       hover={true}
       animation={animation}
       delay={delay}
+      onClick={handleCardClick}
     >
       <div className="p-5 flex flex-col h-full">
         <div className="flex items-start justify-between mb-4">
@@ -84,13 +106,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               <p className="text-white/70 text-sm">{role}</p>
             </div>
           </div>
-          <Link 
-            to={`/profile/${id}`} 
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onProfileClick) onProfileClick();
+            }}
             className="text-kiit-gold/70 hover:text-kiit-gold p-1 transition-colors"
             aria-label="View profile"
           >
             <ArrowUpRight size={18} />
-          </Link>
+          </button>
         </div>
 
         <div className="space-y-2 mb-4 text-sm">
@@ -134,6 +160,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               variant="outline" 
               size="sm" 
               className="w-full"
+              onClick={handleMessageClick}
             >
               <MessageSquare size={14} className="mr-2" />
               Message
@@ -152,6 +179,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               variant="primary" 
               size="sm" 
               className="w-full"
+              onClick={handleConnectClick}
             >
               Connect
             </AnimatedButton>

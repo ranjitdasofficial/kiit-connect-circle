@@ -4,14 +4,16 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import GlassCard from "@/components/ui/GlassCard";
 import ProfileCard from "@/components/alumni/ProfileCard";
-import { Search, Filter } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import AnimatedButton from "@/components/ui/AnimatedButton";
+import SearchFilters from "@/components/alumni/SearchFilters";
+import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Alumni = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
+  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
+  const navigate = useNavigate();
 
   // Mock alumni data
   const alumniData = [
@@ -89,38 +91,72 @@ const Alumni = () => {
     },
   ];
 
-  // Departments for the filter
-  const departments = [
-    "All Departments",
-    "Computer Science",
-    "Mechanical Engineering",
-    "Electrical Engineering",
-    "Civil Engineering",
-    "Business Administration",
-    "Design",
-  ];
+  // Handle search query change
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
 
-  // Graduation years for the filter
-  const graduationYears = [
-    "All Years",
-    "2023",
-    "2022",
-    "2021",
-    "2020",
-    "2019",
-    "2018",
-    "2017",
-    "2016",
-    "2015",
-    "2014",
-  ];
+  // Handle filter changes
+  const handleFilterChange = (filters: Record<string, string[]>) => {
+    setActiveFilters(filters);
+    
+    // Extract department filter
+    if (filters.department && filters.department.length > 0) {
+      const deptMap: Record<string, string> = {
+        cs: "Computer Science",
+        it: "Information Technology",
+        ee: "Electrical Engineering",
+        me: "Mechanical Engineering",
+        civil: "Civil Engineering",
+        business: "Business Administration",
+        design: "Design"
+      };
+      setSelectedDepartment(deptMap[filters.department[0]] || null);
+    } else {
+      setSelectedDepartment(null);
+    }
+    
+    // Extract year filter
+    if (filters.graduationYear && filters.graduationYear.length > 0) {
+      setSelectedYear(filters.graduationYear[0]);
+    } else {
+      setSelectedYear(null);
+    }
+  };
+
+  // Handle connect button click
+  const handleConnect = (id: string) => {
+    // In a real application, this would make an API call
+    toast({
+      title: "Connection Request Sent",
+      description: `Your connection request to the alumni has been sent.`,
+    });
+    
+    // Update the alumni data to reflect pending status
+    const updatedAlumniData = alumniData.map(alumni => 
+      alumni.id === id ? { ...alumni, connection: "pending" as "pending" } : alumni
+    );
+  };
+
+  // Handle message button click
+  const handleMessage = (id: string) => {
+    // Navigate to messages page with the contact id
+    navigate(`/messages?contact=${id}`);
+  };
+
+  // Handle profile click
+  const handleProfileClick = (id: string) => {
+    navigate(`/profile/${id}`);
+  };
 
   // Filter alumni based on search query, department, and year
   const filteredAlumni = alumniData.filter((alumni) => {
     const matchesSearch =
+      !searchQuery ||
       alumni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       alumni.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (alumni.company && alumni.company.toLowerCase().includes(searchQuery.toLowerCase()));
+      (alumni.company && alumni.company.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      alumni.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesDepartment =
       !selectedDepartment ||
@@ -132,7 +168,19 @@ const Alumni = () => {
       selectedYear === "All Years" ||
       alumni.graduationYear.toString() === selectedYear;
 
-    return matchesSearch && matchesDepartment && matchesYear;
+    // Additional filters from SearchFilters component
+    const matchesIndustry = !activeFilters.industry || activeFilters.industry.length === 0 || 
+      (alumni.company && activeFilters.industry.includes("tech") && 
+        ["Google", "Microsoft", "Adobe", "Amazon"].includes(alumni.company));
+    
+    const matchesLocation = !activeFilters.location || activeFilters.location.length === 0 || 
+      (alumni.location && (
+        (activeFilters.location.includes("india") && alumni.location.includes("India")) ||
+        (activeFilters.location.includes("us") && 
+          ["San Francisco", "Seattle", "New York", "Austin"].some(loc => alumni.location.includes(loc)))
+      ));
+
+    return matchesSearch && matchesDepartment && matchesYear && matchesIndustry && matchesLocation;
   });
 
   return (
@@ -152,57 +200,10 @@ const Alumni = () => {
           </div>
 
           <GlassCard className="p-6 mb-8" animation="fade">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" size={18} />
-                <Input
-                  type="text"
-                  placeholder="Search by name, role, or company..."
-                  className="pl-10 bg-kiit-darkgray/70 border-white/10 text-white w-full"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <select
-                  className="w-full bg-kiit-darkgray/70 border border-white/10 rounded-md px-3 py-2 text-white focus:ring-kiit-gold focus:border-kiit-gold"
-                  value={selectedDepartment || "All Departments"}
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
-                >
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <select
-                  className="w-full bg-kiit-darkgray/70 border border-white/10 rounded-md px-3 py-2 text-white focus:ring-kiit-gold focus:border-kiit-gold"
-                  value={selectedYear || "All Years"}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                >
-                  {graduationYears.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <AnimatedButton
-                variant="secondary"
-                size="sm"
-                className="flex items-center"
-              >
-                <Filter size={16} className="mr-2" />
-                Advanced Filters
-              </AnimatedButton>
-            </div>
+            <SearchFilters 
+              onSearch={handleSearch} 
+              onFilterChange={handleFilterChange}
+            />
           </GlassCard>
 
           {filteredAlumni.length > 0 ? (
@@ -213,6 +214,9 @@ const Alumni = () => {
                   profile={alumni}
                   animation="fade"
                   delay={index * 100}
+                  onConnect={() => handleConnect(alumni.id)}
+                  onMessage={() => handleMessage(alumni.id)}
+                  onProfileClick={() => handleProfileClick(alumni.id)}
                 />
               ))}
             </div>
