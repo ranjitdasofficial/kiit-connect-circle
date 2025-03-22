@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, MoreHorizontal, Send, Phone, Video, PaperclipIcon } from "lucide-react";
 import GlassCard from "../ui/GlassCard";
 import { cn } from "@/lib/utils";
@@ -29,21 +29,47 @@ export interface Conversation {
 }
 
 interface MessageCenterProps {
-  conversations: Conversation[];
-  currentUserId: string;
+  conversations?: Conversation[];
+  currentUserId?: string;
   className?: string;
+  initialContactId?: string | null;
 }
 
 const MessageCenter: React.FC<MessageCenterProps> = ({
-  conversations,
-  currentUserId,
+  conversations = MOCK_CONVERSATIONS,
+  currentUserId = "currentUser",
   className,
+  initialContactId,
 }) => {
+  // Find the initial conversation based on initialContactId
+  const getInitialConversation = () => {
+    if (!initialContactId) return conversations.length > 0 ? conversations[0] : null;
+    
+    const foundConversation = conversations.find(conv => 
+      conv.participants.some(p => p.id === initialContactId)
+    );
+    
+    return foundConversation || (conversations.length > 0 ? conversations[0] : null);
+  };
+  
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(
-    conversations.length > 0 ? conversations[0] : null
+    getInitialConversation()
   );
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    // Update active conversation when initialContactId changes
+    if (initialContactId) {
+      const conversation = conversations.find(conv => 
+        conv.participants.some(p => p.id === initialContactId)
+      );
+      
+      if (conversation) {
+        setActiveConversation(conversation);
+      }
+    }
+  }, [initialContactId, conversations]);
 
   const filteredConversations = searchQuery 
     ? conversations.filter(conv => 
@@ -106,6 +132,8 @@ const MessageCenter: React.FC<MessageCenterProps> = ({
       .toUpperCase();
   };
 
+  // Mock data for conversations
+  // Since we're adding this mock data, we don't need to pass it as a prop
   return (
     <div className={cn("grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-12rem)]", className)}>
       {/* Conversation list */}
@@ -341,5 +369,79 @@ const MessageCenter: React.FC<MessageCenterProps> = ({
     </div>
   );
 };
+
+// Mock conversations data
+const MOCK_CONVERSATIONS: Conversation[] = [
+  {
+    id: "1",
+    participants: [
+      { id: "currentUser", name: "You", isOnline: true },
+      { id: "1", name: "Priya Sharma", isOnline: true },
+    ],
+    messages: [
+      {
+        id: "1",
+        senderId: "1",
+        text: "Hi there! How are you doing?",
+        timestamp: new Date(Date.now() - 86400000), // 1 day ago
+        read: true,
+      },
+      {
+        id: "2",
+        senderId: "currentUser",
+        text: "I'm good, thanks! How about you?",
+        timestamp: new Date(Date.now() - 82800000), // 23 hours ago
+        read: true,
+      },
+      {
+        id: "3",
+        senderId: "1",
+        text: "Doing well! I wanted to ask about the alumni meetup next month.",
+        timestamp: new Date(Date.now() - 3600000), // 1 hour ago
+        read: true,
+      },
+    ],
+    lastMessage: {
+      text: "Doing well! I wanted to ask about the alumni meetup next month.",
+      timestamp: new Date(Date.now() - 3600000),
+      read: true,
+    },
+  },
+  {
+    id: "2",
+    participants: [
+      { id: "currentUser", name: "You", isOnline: true },
+      { id: "5", name: "Neha Gupta", isOnline: false },
+    ],
+    messages: [
+      {
+        id: "1",
+        senderId: "currentUser",
+        text: "Hello Neha, I saw you're working at Tesla now?",
+        timestamp: new Date(Date.now() - 259200000), // 3 days ago
+        read: true,
+      },
+      {
+        id: "2",
+        senderId: "5",
+        text: "Yes, I joined last month as a Mechanical Engineer!",
+        timestamp: new Date(Date.now() - 172800000), // 2 days ago
+        read: true,
+      },
+      {
+        id: "3",
+        senderId: "currentUser",
+        text: "That's amazing! Would love to hear more about your experience.",
+        timestamp: new Date(Date.now() - 86400000), // 1 day ago
+        read: true,
+      },
+    ],
+    lastMessage: {
+      text: "That's amazing! Would love to hear more about your experience.",
+      timestamp: new Date(Date.now() - 86400000),
+      read: true,
+    },
+  },
+];
 
 export default MessageCenter;

@@ -9,6 +9,7 @@ interface GlassCardProps {
   clickable?: boolean;
   animation?: "fade" | "scale" | "slide" | "none";
   delay?: number;
+  onClick?: () => void; // Added onClick prop
 }
 
 const GlassCard: React.FC<GlassCardProps> = ({
@@ -18,6 +19,7 @@ const GlassCard: React.FC<GlassCardProps> = ({
   clickable = false,
   animation = "none",
   delay = 0,
+  onClick, // Added onClick parameter
 }) => {
   const getAnimationClass = () => {
     if (animation === "none") return "";
@@ -45,6 +47,7 @@ const GlassCard: React.FC<GlassCardProps> = ({
         getAnimationClass(),
         className
       )}
+      onClick={onClick} // Use the onClick prop
     >
       {children}
     </div>
