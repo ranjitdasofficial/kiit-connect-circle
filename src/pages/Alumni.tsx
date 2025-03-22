@@ -25,7 +25,7 @@ const Alumni = () => {
       graduationYear: 2018,
       department: "Computer Science",
       skills: ["JavaScript", "React", "Node.js", "Machine Learning"],
-      connection: "connected",
+      connection: "connected" as "connected",
     },
     {
       id: "2",
@@ -37,7 +37,7 @@ const Alumni = () => {
       graduationYear: 2015,
       department: "Computer Science",
       skills: ["Product Strategy", "UX Design", "Agile", "Data Analysis"],
-      connection: "none",
+      connection: "none" as "none",
     },
     {
       id: "3",
@@ -49,7 +49,7 @@ const Alumni = () => {
       graduationYear: 2020,
       department: "Design",
       skills: ["UI Design", "Figma", "User Research", "Prototyping"],
-      connection: "pending",
+      connection: "pending" as "pending",
     },
     {
       id: "4",
@@ -61,7 +61,7 @@ const Alumni = () => {
       graduationYear: 2019,
       department: "Computer Science",
       skills: ["Python", "Machine Learning", "Data Analysis", "AWS"],
-      connection: "none",
+      connection: "none" as "none",
     },
     {
       id: "5",
@@ -73,7 +73,7 @@ const Alumni = () => {
       graduationYear: 2016,
       department: "Mechanical Engineering",
       skills: ["CAD Design", "Thermal Systems", "Project Management"],
-      connection: "connected",
+      connection: "connected" as "connected",
     },
     {
       id: "6",
@@ -85,7 +85,7 @@ const Alumni = () => {
       graduationYear: 2017,
       department: "Business Administration",
       skills: ["Financial Analysis", "Investment Strategy", "Market Research"],
-      connection: "none",
+      connection: "none" as "none",
     },
   ];
 
