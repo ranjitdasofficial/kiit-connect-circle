@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   MapPin, Briefcase, GraduationCap, Calendar, Mail, Phone, Globe, 
-  LinkedIn, Twitter, GitHub, Facebook, Edit, Settings, MessageSquare,
+  Linkedin, Twitter, Github, Facebook, Edit, Settings, MessageSquare,
   Users, Plus, Award
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
@@ -274,7 +273,7 @@ const Profile = () => {
                           className="p-2 text-white/60 hover:text-kiit-gold transition-colors rounded-full hover:bg-white/5"
                           aria-label="LinkedIn"
                         >
-                          <LinkedIn size={18} />
+                          <Linkedin size={18} />
                         </a>
                       )}
                       
@@ -298,7 +297,7 @@ const Profile = () => {
                           className="p-2 text-white/60 hover:text-kiit-gold transition-colors rounded-full hover:bg-white/5"
                           aria-label="GitHub"
                         >
-                          <GitHub size={18} />
+                          <Github size={18} />
                         </a>
                       )}
                       
