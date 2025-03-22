@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   MapPin, Briefcase, GraduationCap, Calendar, Mail, Phone, Globe, 
-  Linkedin, Twitter, Github, Facebook, Edit, Settings, MessageSquare,
-  Users, Plus, Award
+  Linkedin, Twitter, Github, Facebook, Settings, MessageSquare,
+  Users, Award
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import GlassCard from "@/components/ui/GlassCard";
 import AnimatedButton from "@/components/ui/AnimatedButton";
+import EditProfileButton from "@/components/profile/EditProfileButton";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
 
@@ -33,6 +34,12 @@ interface Experience {
 interface Skill {
   name: string;
   level?: "Beginner" | "Intermediate" | "Advanced" | "Expert";
+}
+
+interface Achievement {
+  title: string;
+  year: string;
+  description?: string;
 }
 
 interface ProfileTabsProps {
@@ -81,23 +88,8 @@ const Profile = () => {
   // Check if it's the user's own profile
   const isOwnProfile = !id || id === "me";
 
-  useEffect(() => {
-    // This would be an API call in a real app
-    // Here we'll simulate connections for the predefined alumni
-    if (id === "1" || id === "5") {
-      setIsConnected(true);
-      setIsPending(false);
-    } else if (id === "3") {
-      setIsConnected(false);
-      setIsPending(true);
-    } else {
-      setIsConnected(false);
-      setIsPending(false);
-    }
-  }, [id]);
-  
   // Mock profile data - in a real app, this would be fetched from an API
-  const profile = {
+  const [profile, setProfile] = useState({
     name: id === "1" ? "Priya Sharma" : 
           id === "2" ? "Rahul Verma" :
           id === "3" ? "Ananya Patel" :
@@ -205,7 +197,22 @@ const Profile = () => {
         description: "Published a paper on distributed systems at the IEEE International Conference.",
       },
     ],
-  };
+  });
+
+  useEffect(() => {
+    // This would be an API call in a real app
+    // Here we'll simulate connections for the predefined alumni
+    if (id === "1" || id === "5") {
+      setIsConnected(true);
+      setIsPending(false);
+    } else if (id === "3") {
+      setIsConnected(false);
+      setIsPending(true);
+    } else {
+      setIsConnected(false);
+      setIsPending(false);
+    }
+  }, [id]);
 
   // Get initials from name
   const getInitials = (name: string) => {
@@ -230,10 +237,11 @@ const Profile = () => {
     navigate(`/messages?contact=${id}`);
   };
   
-  const handleEdit = () => {
+  const handleProfileUpdate = (updatedProfile: any) => {
+    setProfile(updatedProfile);
     toast({
-      title: "Edit Profile",
-      description: "Profile editing functionality will be available soon.",
+      title: "Profile Updated",
+      description: "Your profile has been successfully updated.",
     });
   };
 
@@ -249,12 +257,10 @@ const Profile = () => {
               <GlassCard animation="fade" delay={100} className="overflow-hidden">
                 <div className="relative h-32 bg-gradient-to-r from-kiit-gold/20 to-kiit-gold/5">
                   {isOwnProfile && (
-                    <button 
-                      className="absolute top-3 right-3 p-2 bg-black/20 rounded-full text-white/70 hover:text-white hover:bg-black/40 transition-colors"
-                      onClick={handleEdit}
-                    >
-                      <Edit size={16} />
-                    </button>
+                    <EditProfileButton 
+                      profile={profile}
+                      onProfileUpdate={handleProfileUpdate}
+                    />
                   )}
                 </div>
                 
@@ -487,9 +493,6 @@ const Profile = () => {
                     <div>
                       <div className="flex justify-between items-center mb-6">
                         <h2 className="text-white font-medium">Experience</h2>
-                        <button className="p-2 text-white/60 hover:text-white rounded-full hover:bg-white/5 transition-colors">
-                          <Plus size={18} />
-                        </button>
                       </div>
                       
                       <div className="space-y-8">
@@ -527,9 +530,6 @@ const Profile = () => {
                     <div>
                       <div className="flex justify-between items-center mb-6">
                         <h2 className="text-white font-medium">Education</h2>
-                        <button className="p-2 text-white/60 hover:text-white rounded-full hover:bg-white/5 transition-colors">
-                          <Plus size={18} />
-                        </button>
                       </div>
                       
                       <div className="space-y-8">
@@ -560,9 +560,6 @@ const Profile = () => {
                     <div>
                       <div className="flex justify-between items-center mb-6">
                         <h2 className="text-white font-medium">Skills</h2>
-                        <button className="p-2 text-white/60 hover:text-white rounded-full hover:bg-white/5 transition-colors">
-                          <Plus size={18} />
-                        </button>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -601,9 +598,6 @@ const Profile = () => {
                     <div>
                       <div className="flex justify-between items-center mb-6">
                         <h2 className="text-white font-medium">Achievements</h2>
-                        <button className="p-2 text-white/60 hover:text-white rounded-full hover:bg-white/5 transition-colors">
-                          <Plus size={18} />
-                        </button>
                       </div>
                       
                       <div className="space-y-6">
